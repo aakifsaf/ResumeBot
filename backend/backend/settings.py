@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist", # Added for token blacklist
     "corsheaders",
     "jd_parser", # Added for job description parsing
+    "composer", # Added for AI resume composition
 ]
 
 MIDDLEWARE = [
