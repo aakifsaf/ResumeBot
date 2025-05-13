@@ -1,15 +1,16 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, permissions
+from rest_framework import status, permissions, generics # Add generics
 from django.shortcuts import get_object_or_404
 from django.conf import settings # To potentially load settings if needed, though we'll use os.environ directly for the key
-
+from .models import GeneratedResume
 import os
 from dotenv import load_dotenv
 from openai import OpenAI # Use OpenAI library for OpenRouter
 
 from users.serializers import ProfileDetailSerializer # To get profile data
 from jd_parser.models import JobDescription
+from .serializers import GeneratedResumeSerializer # Add serializer import
 
 # Load environment variables from .env file
 load_dotenv()
@@ -67,7 +68,7 @@ class ComposeResumeView(APIView):
         # --- Construct the Prompt ---
         # This is a crucial part and may need significant refinement.
         prompt = f"""
-        **Goal:** Generate tailored resume sections (Summary, Experience bullet points, Skills) for a specific job application based on the provided user profile and job description.
+        **Goal:** Generate an ATS-optimized, tailored resume for a specific job application, based on the provided user profile and job description.
 
         **User Profile:**
         ```json
@@ -80,14 +81,37 @@ class ComposeResumeView(APIView):
         ```
 
         **Instructions:**
-        1.  **Analyze** the user profile and the job description.
-        2.  **Identify** the key requirements, skills, and experiences mentioned in the job description.
-        3.  **Match** these requirements with the user's profile information (summary, experiences, skills, projects, education, certifications).
-        4.  **Generate** the following resume content, tailoring it specifically to the job description:
-            *   **Professional Summary:** A concise (3-4 sentence) summary highlighting the most relevant qualifications and experience for THIS job.
-            *   **Tailored Experience Bullet Points:** For EACH relevant experience entry in the user's profile, generate 2-3 impactful bullet points using the STAR method (Situation, Task, Action, Result) that directly address the requirements of the target job description. Use strong action verbs. If an experience is not relevant, skip it.
-            *   **Relevant Skills List:** Extract and list the most relevant skills (technical and soft) from the user's profile that match the job description. Categorize them if appropriate (e.g., Programming Languages, Tools, Soft Skills).
-        5.  **Format:** Present the output clearly, using markdown for sections (e.g., ## Professional Summary).
+            1. **ATS Optimization:** 
+            - Prioritize keywords from the job description (skills, tools, certifications).
+            - Use standard section headers (e.g., "Work Experience," "Projects," "Skills").
+            - Avoid graphics/tables to ensure ATS readability.
+
+            2. **Content Generation:**
+            - **Professional Summary (3-4 sentences):** 
+                - Highlight years of experience, core competencies, and alignment with the job’s mission.
+                - Example: *"Results-driven [Job Title] with [X] years of experience in [Key Skill 1] and [Key Skill 2], seeking to leverage [Achievement] at [Target Company]."*
+
+            - **Work Experience (STAR Method):**
+                - For each role, generate 2-3 bullet points using: 
+                - **Situation/Task:** Brief context.
+                - **Action:** Strong action verbs (*Optimized, Led, Implemented*).
+                - **Result:** Quantifiable outcomes (*"Improved performance by 30%"*).
+                - Example: *"Led a cross-functional team to migrate legacy systems to AWS, reducing downtime by 40%."*
+
+            - **Projects Section:**
+                - Include 1-2 projects relevant to the job. For each:
+                - **Title:** Project name + timeframe.
+                - **Description:** Problem solved, tools used, and measurable impact.
+                - Example: *"Inventory Management System (Python/Django, 2023): Developed a cloud-based system reducing stock discrepancies by 25%."*
+
+            - **Skills (Categorized):**
+                - Group into: *Technical Skills (Programming, Tools), Soft Skills, Certifications*.
+                - Match exact terms from the job description (e.g., "React" vs. "JavaScript").
+
+            3. **Formatting Rules:**
+            - Use Markdown headers (## Work Experience, ### Projects).
+            - Bold key achievements (**$2M cost savings**).
+            - Keep bullets concise (1 line each).
 
         **Output:**
         Generate only the tailored resume content as requested above. Do not include greetings or introductory phrases.
@@ -118,6 +142,56 @@ class ComposeResumeView(APIView):
             # Consider logging the error e
             return Response({"error": f"Error calling AI model: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+        # --- Save Result ---
+        try:
+            GeneratedResume.objects.create(
+                user=user,
+                job_description=jd,
+                generated_content=generated_content
+            )
+        except Exception as e:
+            # Optionally log this error, but still return the content to the user
+            print(f"Error saving generated resume to database: {e}") # Simple print logging
+
         # --- Return Result ---
         return Response({"generated_content": generated_content}, status=status.HTTP_200_OK)
+
+
+class GeneratedResumeListView(generics.ListAPIView):
+    """
+    API endpoint to list generated resumes for the authenticated user.
+    Optionally filter by job_description_id query parameter.
+    """
+    serializer_class = GeneratedResumeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        """Filter resumes by the current user and optionally by job_description_id."""
+        user = self.request.user
+        queryset = GeneratedResume.objects.filter(user=user)
+
+        # Optional filtering by job description ID
+        job_description_id = self.request.query_params.get('job_description_id')
+        if job_description_id:
+            try:
+                jd_id = int(job_description_id)
+                queryset = queryset.filter(job_description__id=jd_id)
+            except (ValueError, TypeError):
+                # Silently ignore invalid job_description_id
+                pass 
+                
+        return queryset.order_by('-created_at') # Already ordered in Meta, but explicit here
+
+class GeneratedResumeDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint to retrieve, update, or delete a specific generated resume by ID.
+    """
+    serializer_class = GeneratedResumeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        """Retrieve the generated resume by ID, ensuring it belongs to the current user."""
+        user = self.request.user
+        resume_id = self.kwargs.get('pk')
+        return get_object_or_404(GeneratedResume, pk=resume_id, user=user)
 
