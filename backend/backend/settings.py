@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "jd_parser", # Added for job description parsing
     "composer", # Added for AI resume composition
+    "resume", # Added for resume management
 ]
 
 MIDDLEWARE = [

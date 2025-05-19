@@ -22,5 +22,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("users.urls")),
     path("api/", include("jd_parser.urls")), # Add URLs for the JD parser app
-    path("api/", include("composer.urls")), # Add URLs for the AI composer app
+    path("api/", include("composer.urls")),
+    path("api/", include("resume.urls")),
 ]
