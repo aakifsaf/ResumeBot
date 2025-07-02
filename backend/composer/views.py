@@ -24,7 +24,6 @@ class ComposeResumeView(APIView):
 
     def post(self, request, *args, **kwargs):
         job_description_id = request.data.get('job_description_id')
-        model_name = request.data.get('model', 'mistralai/mistral-7b-instruct:free') # Default model
 
         if not job_description_id:
             return Response({"error": "'job_description_id' is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -120,7 +119,7 @@ class ComposeResumeView(APIView):
         # --- Make API Call ---
         try:
             completion = client.chat.completions.create(
-                model=model_name,
+                model='mistralai/mistral-7b-instruct:free',
                 messages=[
                     {
                         "role": "system",
@@ -195,3 +194,16 @@ class GeneratedResumeDetailView(generics.RetrieveUpdateDestroyAPIView):
         resume_id = self.kwargs.get('pk')
         return get_object_or_404(GeneratedResume, pk=resume_id, user=user)
 
+class LatestGeneratedResumeView(generics.RetrieveAPIView):
+    """
+    Get the latest generated resume for the current user.
+    """
+    serializer_class = GeneratedResumeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        user = self.request.user
+        try:
+            return GeneratedResume.objects.filter(user=user).latest('created_at')
+        except GeneratedResume.DoesNotExist:
+            raise NotFound('No generated resumes found for this user.')

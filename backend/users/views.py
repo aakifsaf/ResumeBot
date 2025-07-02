@@ -44,12 +44,6 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
         profile, created = Profile.objects.get_or_create(user=self.request.user)
         return profile
 
-    # Override get_serializer_class if you want a simpler serializer for PUT/PATCH
-    def get_serializer_class(self):
-        if self.request.method in ['PUT', 'PATCH']:
-            return ProfileSerializer # Use basic serializer for updates
-        return ProfileDetailSerializer # Use detailed for GET
-
 
 # --- Base View for Profile Items --- 
 class BaseProfileItemMixin:

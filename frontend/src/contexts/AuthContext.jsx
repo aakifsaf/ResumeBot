@@ -1,5 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import apiClient, { loginUser as apiLoginUser, registerUser as apiRegisterUser, fetchUserProfile as apiFetchUserProfile } from '../api'; // Assuming api.js is in src/
+import apiClient, { 
+  loginUser as apiLoginUser, 
+  registerUser as apiRegisterUser, 
+  fetchUserProfile as apiFetchUserProfile,
+  updateUserProfile as apiUpdateUserProfile // Added import for updateUserProfile
+} from '../api'; // Assuming api.js is in src/
 
 const AuthContext = createContext(null);
 
@@ -98,19 +103,43 @@ export const AuthProvider = ({ children }) => {
     // No need to set error here unless logout itself can fail
   };
 
-  const value = {
-    user,
-    token,
-    isLoading,
-    error,
-    login,
-    register,
-    logout,
-    isAuthenticated: !!token && !!user, // Derived state
-    clearError: () => setError(null) // Utility to clear errors
+  const updateUserProfile = async (updatedData) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await apiUpdateUserProfile(updatedData);
+      setUser(response.data);
+      setIsLoading(false);
+      return response.data;
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Failed to update profile');
+      setIsLoading(false);
+      throw err;
+    }
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  const clearError = () => {
+    setError(null);
+  };
+
+  return (
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        token, 
+        isLoading, 
+        error,
+        login, 
+        register, 
+        logout,
+        updateUserProfile,
+        isAuthenticated: !!token && !!user,
+        clearError
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {

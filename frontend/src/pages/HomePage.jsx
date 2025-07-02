@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { FiArrowRight, FiStar, FiCpu, FiFileText, FiEye, FiSettings, FiCheckCircle, FiThumbsUp, FiZap, FiDownload, FiLayout, FiUserPlus } from 'react-icons/fi';
 
@@ -33,16 +34,16 @@ const LoggedOutView = () => (
     animate="visible"
   >
     <motion.div variants={itemVariants} className="mb-6">
-      <FiZap className="text-6xl sm:text-7xl text-teal-300 mx-auto" />
+      <FiZap className="text-6xl sm:text-7xl text-primary-400 mx-auto" />
     </motion.div>
     <motion.h1 
-      className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-6 tracking-tight text-gray-100"
+      className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-6 tracking-tight text-dark-50"
       variants={itemVariants}
     >
-      Craft Your Future with <span className="text-teal-300">AI Resume Composer</span>
+      Craft Your Future with <span className="text-primary-400">AI Resume Composer</span>
     </motion.h1>
     <motion.p 
-      className="text-lg sm:text-xl text-gray-300 mb-10 max-w-xl mx-auto leading-relaxed"
+      className="text-lg sm:text-xl text-dark-300 mb-10 max-w-xl mx-auto leading-relaxed"
       variants={itemVariants}
     >
       Transform your career prospects with a professionally tailored resume, intelligently generated to highlight your strengths and match your dream job.
@@ -50,7 +51,7 @@ const LoggedOutView = () => (
     <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-center items-center gap-4">
       <Link
         to="/register"
-        className="group relative inline-flex items-center justify-center px-8 py-3.5 text-lg font-semibold text-white bg-teal-500 rounded-lg hover:bg-teal-600 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-gray-900 overflow-hidden"
+        className="group relative inline-flex items-center justify-center px-8 py-3.5 text-lg font-semibold text-white bg-primary-500 rounded-custom hover:bg-primary-600 transition-custom duration-300 ease-in-out shadow-custom-lg hover:shadow-custom-xl focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 focus:ring-offset-dark-900 overflow-hidden hover:scale-105"
       >
         <span className="absolute left-0 top-0 w-0 h-full bg-teal-400 transition-all duration-500 ease-out group-hover:w-full"></span>
         <span className="relative flex items-center">
@@ -59,7 +60,7 @@ const LoggedOutView = () => (
       </Link>
       <Link
         to="/login"
-        className="px-8 py-3.5 text-lg font-semibold text-teal-100 bg-transparent border-2 border-teal-300 rounded-lg hover:bg-teal-300 hover:text-teal-700 transition-all duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-200 focus:ring-offset-2 focus:ring-offset-gray-900"
+        className="px-8 py-3.5 text-lg font-semibold text-primary-100 bg-transparent border-2 border-primary-300 rounded-custom hover:bg-primary-300 hover:text-primary-700 transition-custom duration-300 ease-in-out shadow-custom-md hover:shadow-custom-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:ring-offset-2 focus:ring-offset-dark-900 hover:scale-105"
       >
         Already a Member?
       </Link>
@@ -72,7 +73,7 @@ const LoggedInView = () => {
   const { user } = useAuth();
   return (
     <motion.div 
-      className="text-center max-w-3xl mx-auto bg-white/5 backdrop-blur-md p-8 sm:p-10 rounded-xl shadow-2xl mb-16"
+      className="text-center max-w-3xl mx-auto bg-dark-800/10 backdrop-blur-md p-8 sm:p-10 rounded-custom shadow-custom-2xl mb-16 animate-fade-in"
       variants={itemVariants}
       initial="hidden"
       animate="visible"
@@ -81,13 +82,13 @@ const LoggedInView = () => {
         <FiCheckCircle className="text-6xl sm:text-7xl text-green-400 mx-auto" />
       </motion.div>
       <motion.h1 
-        className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 tracking-tight text-gray-100"
+        className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 tracking-tight text-dark-50"
         variants={itemVariants}
       >
         Welcome Back, <span className="text-green-300">{user?.username}!</span>
       </motion.h1>
       <motion.p 
-        className="text-lg text-gray-300 mb-8 max-w-xl mx-auto leading-relaxed"
+        className="text-lg text-dark-300 mb-8 max-w-xl mx-auto leading-relaxed"
         variants={itemVariants}
       >
         Ready to continue shaping your career? Access your dashboard or start a new resume.
@@ -95,7 +96,7 @@ const LoggedInView = () => {
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-center items-center gap-4">
         <Link
           to="/dashboard"
-          className="group relative inline-flex items-center justify-center px-8 py-3.5 text-lg font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:ring-offset-gray-900 overflow-hidden"
+          className="group relative inline-flex items-center justify-center px-8 py-3.5 text-lg font-semibold text-white bg-primary-500 rounded-custom hover:bg-primary-600 transition-custom duration-300 ease-in-out shadow-custom-lg hover:shadow-custom-xl focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2 focus:ring-offset-dark-900 overflow-hidden hover:scale-105"
         >
           <span className="absolute left-0 top-0 w-0 h-full bg-green-400 transition-all duration-500 ease-out group-hover:w-full"></span>
           <span className="relative flex items-center">
@@ -104,7 +105,7 @@ const LoggedInView = () => {
         </Link>
         <Link
           to="/create-resume"
-          className="px-8 py-3.5 text-lg font-semibold text-green-100 bg-transparent border-2 border-green-300 rounded-lg hover:bg-green-300 hover:text-green-700 transition-all duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-200 focus:ring-offset-2 focus:ring-offset-gray-900"
+          className="px-8 py-3.5 text-lg font-semibold text-primary-100 bg-transparent border-2 border-primary-300 rounded-custom hover:bg-primary-300 hover:text-primary-700 transition-custom duration-300 ease-in-out shadow-custom-md hover:shadow-custom-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:ring-offset-2 focus:ring-offset-dark-900 hover:scale-105"
         >
           Create New Resume
         </Link>
@@ -128,12 +129,12 @@ const HowItWorksSection = () => {
       initial="hidden"
       animate="visible"
     >
-      <h2 className="text-3xl font-bold text-center text-gray-100 mb-10">How It Works</h2>
+      <h2 className="text-3xl font-bold text-center text-dark-400 mb-10">How It Works</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
         {steps.map((step, index) => (
           <motion.div 
             key={index} 
-            className="bg-white/5 backdrop-blur-sm p-6 rounded-lg shadow-lg hover:shadow-teal-500/20 transition-shadow duration-300"
+            className="bg-dark-800/10 backdrop-blur-sm p-6 rounded-custom shadow-custom-lg hover:shadow-accent-500/20 transition-custom duration-300 hover:scale-105"
             variants={itemVariants} // Use itemVariants for individual steps
           >
             {step.icon}
@@ -162,16 +163,16 @@ const FeaturesSection = () => {
       animate="visible"
     >
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold text-center text-gray-100 mb-12">Key Features</h2>
+        <h2 className="text-3xl font-bold text-center text-dark-400 mb-12">Key Features</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
             <motion.div 
               key={index} 
-              className="flex flex-col items-center text-center p-6 bg-gray-800/40 rounded-lg shadow-xl hover:shadow-purple-500/20 transition-shadow duration-300"
+              className="flex flex-col items-center text-center p-6 bg-dark-800/40 rounded-custom shadow-custom-xl hover:shadow-primary-500/20 transition-custom duration-300 hover:scale-105"
               variants={itemVariants}
             >
               {feature.icon}
-              <h3 className="text-xl font-semibold text-gray-200 mt-4 mb-2">{feature.title}</h3>
+              <h3 className="text-xl font-semibold text-dark-200 mt-4 mb-2">{feature.title}</h3>
               <p className="text-gray-400 text-sm">{feature.description}</p>
             </motion.div>
           ))}
@@ -195,7 +196,7 @@ const TestimonialsSection = () => {
       initial="hidden"
       animate="visible"
     >
-      <h2 className="text-3xl font-bold text-center text-gray-100 mb-12">What Our Users Say</h2>
+      <h2 className="text-3xl font-bold text-center text-dark-400 mb-12">What Our Users Say</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {testimonials.map((testimonial, index) => (
           <motion.div 
@@ -230,26 +231,25 @@ const FooterInfo = () => (
 const HomePage = () => {
   const { user } = useAuth();
 
+  // If user is logged in, redirect to dashboard
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <motion.div 
-      className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center text-white p-4 sm:p-6 lg:p-8 overflow-x-hidden" // Added overflow-x-hidden for safety
+      className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-4 text-dark-400"
       style={{
-        background: 'linear-gradient(135deg, #0D47A1 0%, #00796B 50%, #004D40 100%)', 
+        background: 'linear-gradient(135deg, var(--color-primary-900) 0%, var(--color-primary-700) 50%, var(--color-primary-600) 100%)', 
       }}
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {user ? <LoggedInView /> : <LoggedOutView />}
-      
-      {!user && (
-        <>
-          <HowItWorksSection />
-          <FeaturesSection />
-          <TestimonialsSection />
-        </>
-      )}
-      
+      <LoggedOutView />
+      <HowItWorksSection />
+      <FeaturesSection />
+      <TestimonialsSection />
       <FooterInfo />
     </motion.div>
   );

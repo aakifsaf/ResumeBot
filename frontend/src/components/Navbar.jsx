@@ -27,12 +27,14 @@ const Navbar = () => {
           AI Resume Composer
         </Link>
         <div className="flex items-center space-x-5">
-          <motion.div variants={navItemVariants} whileHover="hover" whileTap="tap">
-            <Link to="/" className="flex items-center space-x-1 hover:text-blue-400 transition-colors duration-300">
-              <FiHome />
-              <span>Home</span>
-            </Link>
-          </motion.div>
+          {!user && (
+            <motion.div variants={navItemVariants} whileHover="hover" whileTap="tap">
+              <Link to="/" className="flex items-center space-x-1 hover:text-blue-400 transition-colors duration-300">
+                <FiHome />
+                <span>Home</span>
+              </Link>
+            </motion.div>
+          )}
 
           {user ? (
             <>

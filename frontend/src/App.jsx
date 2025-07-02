@@ -7,6 +7,8 @@ import Navbar from './components/Navbar'; // Import the Navbar
 import ProfilePage from './pages/ProfilePage'; // Import ProfilePage
 import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRoute
 import DashboardPage from './pages/DashboardPage'; // Import DashboardPage
+import CreateResumePage from './pages/CreateResumePage'; // Import CreateResumePage
+import ResumePreviewPage from './pages/ResumePreviewPage'; // Import ResumePreviewPage
 
 function App() {
   return (
@@ -18,14 +20,17 @@ function App() {
       <main className="flex-grow">
         {/* Removed container and p-8 from here, pages will manage their own padding */}
         <Routes>
-          <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          {/* Home Route - Always Accessible */}
+          <Route path="/" element={<HomePage />} />
           {/* Protected Routes: */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/dashboard" element={<DashboardPage />} /> {/* Add DashboardPage route */}
-            {/* Add other protected routes here, e.g., /createresume */}
+            <Route path="dashboard" element={<DashboardPage />} /> {/* Default route for authenticated users */}
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="create-resume" element={<CreateResumePage />} />
+            <Route path="resume/:id" element={<ResumePreviewPage />} />
+            {/* Add other protected routes here */}
           </Route>
           {/* More routes for dashboard etc. will be added later */}
         </Routes>

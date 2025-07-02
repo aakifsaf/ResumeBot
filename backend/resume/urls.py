@@ -1,11 +1,10 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import ResumeViewSet, ResumeTemplateViewSet
+from django.urls import path
+from .views import ResumeTemplateListView, ResumeTemplateDetailView, ResumeListView, ResumeDetailView
 
-router = DefaultRouter()
-router.register(r'templates', ResumeTemplateViewSet, basename='resumetemplate')
-router.register(r'resumes', ResumeViewSet, basename='resume')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('templates/', ResumeTemplateListView.as_view(), name='resumetemplate-list'),
+    path('templates/<int:pk>/', ResumeTemplateDetailView.as_view(), name='resumetemplate-detail'),
+    path('resumes/', ResumeListView.as_view(), name='resume-list'),
+    path('resumes/<int:pk>/', ResumeDetailView.as_view(), name='resume-detail'),
 ]
