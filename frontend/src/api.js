@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api'; // Your Django backend URL
+const API_URL = 'http://localhost:8000/api';
 
 const apiClient = axios.create({
   baseURL: API_URL,
@@ -9,16 +9,76 @@ const apiClient = axios.create({
   },
 });
 
-// Interceptor to add JWT token to requests
+// Add token refresh interceptor
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+const onRefreshed = (access) => {
+  refreshSubscribers.forEach(callback => callback(access));
+  refreshSubscribers = [];
+};
+
+// Helper function to get token from localStorage
+const getToken = () => localStorage.getItem('access_token');
+
+apiClient.interceptors.response.use(
+  response => response,
+  async error => {
+    const originalRequest = error.config;
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          refreshSubscribers.push((access) => {
+            originalRequest.headers['Authorization'] = `Bearer ${access}`;
+            resolve(apiClient(originalRequest));
+          });
+          reject(error);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const refresh = localStorage.getItem('refresh_token');
+        if (!refresh) {
+          throw new Error('No refresh token available');
+        }
+
+        const response = await apiClient.post('/token/refresh/', { refresh });
+        const { access } = response.data;
+        
+        if (access) {
+          localStorage.setItem('access_token', access);
+          originalRequest.headers['Authorization'] = `Bearer ${access}`;
+          onRefreshed(access);
+          return apiClient(originalRequest);
+        }
+      } catch (refreshError) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+// Add token to requests
 apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('authToken');
+  config => {
+    const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
+  error => {
     return Promise.reject(error);
   }
 );
@@ -60,10 +120,14 @@ export const createResume = (resumeData) => apiClient.post('/resumes/', resumeDa
 export const fetchResume = (resumeId) => apiClient.get(`/resumes/${resumeId}/`);
 export const updateResume = (resumeId, resumeData) => apiClient.patch(`/resumes/${resumeId}/`, resumeData);
 export const deleteResume = (resumeId) => apiClient.delete(`/resumes/${resumeId}/`);
+export const fetchResumePreview = (resumeId) => apiClient.get(`/resumes/${resumeId}/preview/`);
+export const fetchAIGeneratedResumePreview = (resumeId) => apiClient.get(`/generated/${resumeId}/preview/`);
 
 export const createJobDescription = (jobDescriptionData) => apiClient.post('/job-descriptions/', jobDescriptionData);
 export const generateResume = (data) => apiClient.post('/compose/', data);
 export const fetchLatestGeneratedResume = () => apiClient.get('/generated-resumes/latest/');
 export const fetchGeneratedResume = (resumeId) => apiClient.get(`/generated/${resumeId}/`);
+
+export const createManualResume = (resumeData) => apiClient.post('/manual-resumes/', resumeData);
 
 export default apiClient;

@@ -1,6 +1,7 @@
 from rest_framework import generics
+from rest_framework.response import Response
 from .models import ResumeTemplate, Resume
-from .serializers import ResumeTemplateSerializer, ResumeSerializer
+from .serializers import ResumeTemplateSerializer, ResumeSerializer, ManualResumeSerializer
 
 class ResumeTemplateListView(generics.ListAPIView):
     queryset = ResumeTemplate.objects.filter(is_active=True)
@@ -23,3 +24,19 @@ class ResumeListView(generics.ListCreateAPIView):
 class ResumeDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Resume.objects.all()
     serializer_class = ResumeSerializer
+
+class ManualResumeCreateView(generics.CreateAPIView):
+    serializer_class = ManualResumeSerializer
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class ResumePreviewView(generics.RetrieveAPIView):
+    queryset = Resume.objects.all()
+    serializer_class = ResumeSerializer
+    
+    def get(self, request, *args, **kwargs):
+        resume = self.get_object()
+        # Add any additional processing for preview if needed
+        serializer = self.get_serializer(resume)
+        return Response(serializer.data)

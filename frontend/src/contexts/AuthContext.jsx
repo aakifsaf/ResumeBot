@@ -10,7 +10,7 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('authToken'));
+  const [token, setToken] = useState(localStorage.getItem('access_token')); // Changed from authToken
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -19,20 +19,22 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         try {
-          // console.log('AuthProvider: Found token, fetching profile...');
           const response = await apiFetchUserProfile();
           setUser(response.data);
-          // console.log('AuthProvider: Profile fetched', response.data);
         } catch (err) {
-          // console.error('AuthProvider: Error fetching profile with existing token', err);
-          localStorage.removeItem('authToken');
-          setToken(null);
-          setUser(null);
-          delete apiClient.defaults.headers.common['Authorization'];
-          setError('Session expired or token is invalid. Please log in again.'); 
+          // Handle token expiration
+          if (err.response?.status === 401) {
+            localStorage.removeItem('access_token');
+            setToken(null);
+            setUser(null);
+            delete apiClient.defaults.headers.common['Authorization'];
+            setError('Session expired. Please log in again.');
+            // Redirect to login page
+            window.location.href = '/login';
+          } else {
+            throw err;
+          }
         }
-      } else {
-        // console.log('AuthProvider: No token found.');
       }
       setIsLoading(false);
     };
@@ -44,19 +46,16 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await apiLoginUser(credentials);
-      const { access, user: userData } = response.data; // Adjust based on your backend login response
-      localStorage.setItem('authToken', access);
+      const { access } = response.data; // Get the access token
+      localStorage.setItem('access_token', access); // Changed from authToken
       setToken(access);
       apiClient.defaults.headers.common['Authorization'] = `Bearer ${access}`;
       
-      // If your /token/ endpoint doesn't return full user data, fetch it separately or adjust
-      // For now, assuming /profile/ is the source of truth for user object after login.
       const profileResponse = await apiFetchUserProfile();
       setUser(profileResponse.data);
       setIsLoading(false);
       return profileResponse.data;
     } catch (err) {
-      // console.error('AuthProvider: Login failed', err.response?.data || err.message);
       setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
       setIsLoading(false);
       throw err;
@@ -95,12 +94,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    // console.log('AuthProvider: Logging out');
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('access_token'); // Changed from authToken
     setToken(null);
     setUser(null);
     delete apiClient.defaults.headers.common['Authorization'];
-    // No need to set error here unless logout itself can fail
+    // Redirect to login page
+    window.location.href = '/login';
   };
 
   const updateUserProfile = async (updatedData) => {
@@ -118,21 +117,41 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshToken = async () => {
+    try {
+      const refresh = localStorage.getItem('refresh_token');
+      if (refresh) {
+        const response = await apiClient.post('/token/refresh/', { refresh });
+        const { access } = response.data;
+        localStorage.setItem('access_token', access);
+        setToken(access);
+        apiClient.defaults.headers.common['Authorization'] = `Bearer ${access}`;
+        return true;
+      }
+      return false;
+    } catch (err) {
+      return false;
+    }
+  };
+
   const clearError = () => {
     setError(null);
   };
 
   return (
-    <AuthContext.Provider 
-      value={{ 
-        user, 
-        token, 
-        isLoading, 
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        isLoading,
         error,
-        login, 
-        register, 
+        login,
+        register,
         logout,
         updateUserProfile,
+        refreshToken,
+        setUser,
+        setToken,
         isAuthenticated: !!token && !!user,
         clearError
       }}

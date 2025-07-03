@@ -207,3 +207,12 @@ class LatestGeneratedResumeView(generics.RetrieveAPIView):
             return GeneratedResume.objects.filter(user=user).latest('created_at')
         except GeneratedResume.DoesNotExist:
             raise NotFound('No generated resumes found for this user.')
+
+class GeneratedResumePreviewView(generics.RetrieveAPIView):
+    queryset = GeneratedResume.objects.all()
+    serializer_class = GeneratedResumeSerializer
+    
+    def get(self, request, *args, **kwargs):
+        resume = self.get_object()
+        serializer = self.get_serializer(resume)
+        return Response(serializer.data)

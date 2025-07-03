@@ -39,6 +39,13 @@ class Resume(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     resume_file = models.FileField(upload_to='resumes/', blank=True, null=True)
+    personal_info = models.JSONField(default=dict, blank=True)
+    work_experiences = models.JSONField(default=list, blank=True)
+    education = models.JSONField(default=list, blank=True)
+    projects = models.JSONField(default=list, blank=True)
+    certifications = models.JSONField(default=list, blank=True)
+    languages = models.JSONField(default=list, blank=True)
+    skills = models.JSONField(default=list, blank=True)
     
 
     def __str__(self):
