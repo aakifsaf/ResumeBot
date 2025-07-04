@@ -130,4 +130,8 @@ export const fetchGeneratedResume = (resumeId) => apiClient.get(`/generated/${re
 
 export const createManualResume = (resumeData) => apiClient.post('/manual-resumes/', resumeData);
 
+export const fetchUserResumes = () => apiClient.get('/resumes/');
+export const fetchAIGeneratedResumes = () => apiClient.get('/generated/');
+export const deleteAIGeneratedResume = (id) => apiClient.delete(`/generated/${id}/`);
+
 export default apiClient;

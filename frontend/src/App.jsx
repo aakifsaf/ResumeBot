@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute'; // Import ProtectedRou
 import DashboardPage from './pages/DashboardPage'; // Import DashboardPage
 import CreateResumePage from './pages/CreateResumePage'; // Import CreateResumePage
 import ResumePreviewPage from './pages/ResumePreviewPage'; // Import ResumePreviewPage
+import MyResumesPage from './pages/MyResumesPage'; // Import MyResumesPage
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             <Route path="profile" element={<ProfilePage />} />
             <Route path="create-resume" element={<CreateResumePage />} />
             <Route path="resume/:id" element={<ResumePreviewPage />} />
+            <Route path="my-resumes" element={<MyResumesPage />} />
             {/* Add other protected routes here */}
           </Route>
           {/* More routes for dashboard etc. will be added later */}
